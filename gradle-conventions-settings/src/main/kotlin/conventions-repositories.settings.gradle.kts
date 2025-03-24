@@ -95,7 +95,16 @@ pluginManagement {
             mavenCentral()
             gradlePluginPortal()
         }
-
+        maven {
+            name="github-maven"
+            url=uri("https://raw.githubusercontent.com/vickyleu/kotlin_linuxarm32hfp_maven/main")
+            content {
+                includeGroup("com.vickyleu.kotlinx.coroutines")
+                includeGroup("com.vickyleu.kotlinx")
+                includeGroup("com.vickyleu.ktor")
+                includeGroup("com.vickyleu.oshai")
+            }
+        }
         maven("${findGlobalRootDirPath()}/lib-kotlin/")
     }
 }
@@ -192,7 +201,7 @@ gradle.rootProject {
         this.extra["localProperties"] = localProps
         this.extra["useProxyRepositories"] = localProps.isUsingProxyRepositories()
 
-        val useProxy = localProps.isUsingProxyRepositories()
+        val useProxy =  localProps.isUsingProxyRepositories()
 
         val globalRootDir = findGlobalRootDirPath()
 
@@ -205,8 +214,31 @@ gradle.rootProject {
                     mavenCentral()
                     gradlePluginPortal()
                 }
-
+                maven {
+                    name="github-maven"
+                    url=uri("https://raw.githubusercontent.com/vickyleu/kotlin_linuxarm32hfp_maven/main")
+                    content {
+                        includeGroup("com.vickyleu.kotlinx.coroutines")
+                        includeGroup("com.vickyleu.kotlinx")
+                        includeGroup("com.vickyleu.ktor")
+                        includeGroup("com.vickyleu.oshai")
+                    }
+                }
                 maven("$globalRootDir/lib-kotlin/")
+            }
+        }
+        project.configurations.all {
+            // 所有group是org.jetbrains.kotlinx并且module包含coroutines的都替换成com.vickyleu.kotlinx.coroutines:原来的module:版本号
+            resolutionStrategy.eachDependency {
+                if (requested.group == "org.jetbrains.kotlinx" && requested.module.name.startsWith("kotlinx-coroutines")){
+                    this.useTarget("com.vickyleu.kotlinx.coroutines:${requested.module.name}:1.10.1-SNAPSHOT")
+                }else if (requested.group == "org.jetbrains.kotlinx" && requested.module.name.startsWith("kotlinx-html")){
+                    this.useTarget("com.vickyleu.kotlinx:${requested.module.name}:0.12.0")
+                }else if (requested.group == "io.ktor" && requested.module.name.startsWith("ktor")){
+                    this.useTarget("com.vickyleu.ktor:${requested.module.name}:3.1.2-SNAPSHOT")
+                }else if (requested.group == "io.github.oshai"){
+                    this.useTarget("com.vickyleu.oshai:${requested.module.name}:7.0.6")
+                }
             }
         }
         repositories {
@@ -225,7 +257,16 @@ gradle.rootProject {
 
                 maven("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
             }
-
+            maven {
+                name="github-maven"
+                url=uri("https://raw.githubusercontent.com/vickyleu/kotlin_linuxarm32hfp_maven/main")
+                content {
+                    includeGroup("com.vickyleu.kotlinx.coroutines")
+                    includeGroup("com.vickyleu.kotlinx")
+                    includeGroup("com.vickyleu.ktor")
+                    includeGroup("com.vickyleu.oshai")
+                }
+            }
             maven("$globalRootDir/lib-kotlin/")
         }
     }

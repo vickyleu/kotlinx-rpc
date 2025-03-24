@@ -25,10 +25,10 @@ if (isPublicModule) {
 
 fun PublishingExtension.configurePublication() {
     repositories {
-        configureSonatypeRepository()
-        configureSpaceEapRepository()
-        configureSpaceGrpcRepository()
-        configureForIdeRepository()
+//        configureSonatypeRepository()
+//        configureSpaceEapRepository()
+//        configureSpaceGrpcRepository()
+//        configureForIdeRepository()
         configureLocalDevRepository()
     }
 
@@ -140,7 +140,7 @@ fun RepositoryHandler.configureForIdeRepository() {
 
 fun RepositoryHandler.configureLocalDevRepository() {
     // Something that's straightforward to "clean" for development, not mavenLocal
-    maven("$globalRootDir/build/repo") {
+    maven("$globalRootDir/maven/myRepo") {
         name = "buildRepo"
     }
 }

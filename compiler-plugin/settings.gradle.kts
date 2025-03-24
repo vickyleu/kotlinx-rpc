@@ -14,7 +14,7 @@ pluginManagement {
 plugins {
     id("conventions-repositories")
     id("conventions-version-resolution")
-    id("conventions-develocity")
+//    id("conventions-develocity")
 }
 
 includeRootAsPublic()

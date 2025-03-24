@@ -26,7 +26,8 @@ val kotlinVersion = rootProject.libs.versions.kotlin.lang.get()
 val kotlinCompiler = rootProject.libs.versions.kotlin.compiler.get()
 
 allprojects {
-    group = "org.jetbrains.kotlinx"
+    group = "com.vickyleu.kotlinx"
+//    group = "org.jetbrains.kotlinx"
     version = rootProject.libs.versions.kotlinx.rpc.get()
 }
 

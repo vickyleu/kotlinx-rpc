@@ -14,6 +14,7 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.maven
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import java.io.File
+import java.net.URI
 
 const val KOTLINX_RPC_PREFIX = "kotlinx-rpc"
 
@@ -134,7 +135,7 @@ fun RepositoryHandler.configureRepository(
     configBuilder: PublicationRepositoryConfig.() -> Unit,
 ) {
     val config = PublicationRepositoryConfig().apply(configBuilder)
-    val url = config.url ?: run {
+    /*val url = config.url ?: run {
         project.logger.info("No ${config.name} URL provided, skipping repository configuration")
         return
     }
@@ -154,16 +155,19 @@ fun RepositoryHandler.configureRepository(
                     "skipping repository configuration"
         )
         return
+    }*/
+    maven{
+        url = URI("${
+            project.rootDir.resolve("maven").absolutePath}/myRepo2")
     }
-
-    maven(url = url) {
-        name = config.name ?: configError("name")
-
-        credentials {
-            username = usernameValue
-            password = passwordValue
-        }
-    }
+//    maven(url = url) {
+//        name = config.name ?: configError("name")
+//
+//        credentials {
+//            username = usernameValue
+//            password = passwordValue
+//        }
+//    }
 
     project.logger.info("Configured ${config.name} repository for publication")
 }

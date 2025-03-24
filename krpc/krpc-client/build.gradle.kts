@@ -20,6 +20,7 @@ kotlin {
 
                 implementation(libs.serialization.core)
                 implementation(libs.kotlin.reflect)
+                implementation(libs.coroutines.core)
 
                 implementation(projects.krpc.krpcLogging)
             }

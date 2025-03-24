@@ -15,6 +15,7 @@ val kotlinCompilerVersion = libs.versions.kotlin.compiler.get()
 val kotlinLangVersion = libs.versions.kotlin.lang.get()
 
 allprojects {
+//    group = "com.vickyleu.kotlinx"
     group = "org.jetbrains.kotlinx"
     whenForIde {
         version = "$kotlinCompilerVersion-$rpcVersion"
