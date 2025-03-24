@@ -42,7 +42,7 @@ fun PublishingExtension.configurePublication() {
 
     publications.withType(MavenPublication::class).all {
         pom.configureMavenCentralMetadata()
-        signPublicationIfKeyPresent()
+//        signPublicationIfKeyPresent()
         if (javadocJar != null) {
             artifact(javadocJar)
         }
