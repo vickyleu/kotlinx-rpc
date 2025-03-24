@@ -8,6 +8,7 @@ import util.isPublicModule
 plugins {
     `java-platform`
     `maven-publish`
+    id(libs.plugins.kotlin.multiplatform.get().pluginId) apply false
     alias(libs.plugins.conventions.common)
 }
 
@@ -30,5 +31,6 @@ publishing {
 
             from(components["javaPlatform"])
         }
+
     }
 }

@@ -2,6 +2,14 @@
  * Copyright 2023-2025 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
  */
 
+import gradle.kotlin.dsl.accessors._1859e2a6ff8d0a87dae202f489fb97f5.apiDependenciesMetadata
+import gradle.kotlin.dsl.accessors._1859e2a6ff8d0a87dae202f489fb97f5.apiElements
+import gradle.kotlin.dsl.accessors._90dfa3f8a3f5813686c8ef8a8b413b1a.commonMainApi
+import gradle.kotlin.dsl.accessors._90dfa3f8a3f5813686c8ef8a8b413b1a.commonMainApiDependenciesMetadata
+import gradle.kotlin.dsl.accessors._90dfa3f8a3f5813686c8ef8a8b413b1a.commonMainImplementation
+import org.gradle.api.internal.component.SoftwareComponentInternal
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import util.*
 
 val isGradlePlugin = project.name == "gradle-plugin"
@@ -17,6 +25,35 @@ if (isPublicModule) {
         apply(plugin = "signing")
     }
 
+    if(project.name=="bom"){
+        // 定义一个新的配置用于 metadataApiElements 变体
+        project.afterEvaluate {
+            project.components.withType<SoftwareComponentInternal>().configureEach {
+                if(this is AdhocComponentWithVariants){
+                    // 添加共用variant
+                    val dependency = configurations.apiElements.get().allDependencyConstraints
+                    /**
+                     * "name": "metadataApiElements",
+                     *       "attributes": {
+                     *         "org.gradle.category": "library",
+                     *         "org.gradle.jvm.environment": "non-jvm",
+                     *         "org.gradle.usage": "kotlin-metadata",
+                     *         "org.jetbrains.kotlin.platform.type": "common"
+                     *       },
+                     */
+                    addVariantsFromConfiguration(configurations.create("metadataApiElements") {
+                        this.attributes.attribute(KotlinPlatformType.attribute, KotlinPlatformType.common)
+                        this.attributes.attribute(Category.CATEGORY_ATTRIBUTE, objects.named("library"))
+                        this.attributes.attribute(TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE, objects.named("non-jvm"))
+                        this.attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named("kotlin-metadata"))
+                        this.dependencyConstraints.addAll(dependency)
+                    }) {
+
+                    }
+                }
+            }
+        }
+    }
     the<PublishingExtension>().configurePublication()
     logger.info("Configured ${project.name} for publication")
 } else {
@@ -52,6 +89,9 @@ fun PublishingExtension.configurePublication() {
 
         if (!isGradlePlugin) {
             fixModuleMetadata(project)
+            println("isNotGradlePlugin==${project.name} ${project.path}")
+        }else{
+            println("isGradlePlugin==${project.name} ${project.path}")
         }
 
         logger.info("Project ${project.name} -> Publication configured: $name, $version")
