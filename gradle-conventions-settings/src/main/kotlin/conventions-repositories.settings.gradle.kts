@@ -78,6 +78,9 @@ pluginManagement {
             } else {
                 logger.info("Skipping adding credentials for Space repository '$repoName'")
             }
+            content {
+                    excludeGroupByRegex("com.vickyleu.*")
+            }
         }
     }
 
@@ -92,20 +95,29 @@ pluginManagement {
             buildDeps()
             buildDepsEap()
         } else {
-            mavenCentral()
-            gradlePluginPortal()
+            mavenCentral(){
+                content {
+                    excludeGroupByRegex("com.vickyleu.*")
+                }
+            }
+            gradlePluginPortal(){
+                content {
+                    excludeGroupByRegex("com.vickyleu.*")
+                }
+            }
         }
         maven {
             name="github-maven"
             url=uri("https://raw.githubusercontent.com/vickyleu/kotlin_linuxarm32hfp_maven/main")
             content {
-                includeGroup("com.vickyleu.kotlinx.coroutines")
-                includeGroup("com.vickyleu.kotlinx")
-                includeGroup("com.vickyleu.ktor")
-                includeGroup("com.vickyleu.oshai")
+                includeGroupByRegex("com.vickyleu.*")
             }
         }
-        maven("${findGlobalRootDirPath()}/lib-kotlin/")
+        maven("${findGlobalRootDirPath()}/lib-kotlin/"){
+            content {
+                excludeGroupByRegex("com.vickyleu.*")
+            }
+        }
     }
 }
 
@@ -211,24 +223,32 @@ gradle.rootProject {
                     buildDeps()
                     buildDepsEap()
                 } else {
-                    mavenCentral()
-                    gradlePluginPortal()
+                    mavenCentral(){
+                        content {
+                            excludeGroupByRegex("com.vickyleu.*")
+                        }
+                    }
+                    gradlePluginPortal(){
+                        content {
+                            excludeGroupByRegex("com.vickyleu.*")
+                        }
+                    }
                 }
                 maven {
                     name="github-maven"
                     url=uri("https://raw.githubusercontent.com/vickyleu/kotlin_linuxarm32hfp_maven/main")
                     content {
-                        includeGroup("com.vickyleu.kotlinx.coroutines")
-                        includeGroup("com.vickyleu.kotlinx")
-                        includeGroup("com.vickyleu.ktor")
-                        includeGroup("com.vickyleu.oshai")
+                        includeGroupByRegex("com.vickyleu.*")
                     }
                 }
-                maven("$globalRootDir/lib-kotlin/")
+                maven("$globalRootDir/lib-kotlin/"){
+                    content {
+                        excludeGroupByRegex("com.vickyleu.*")
+                    }
+                }
             }
         }
         project.configurations.all {
-            // 所有group是org.jetbrains.kotlinx并且module包含coroutines的都替换成com.vickyleu.kotlinx.coroutines:原来的module:版本号
             resolutionStrategy.eachDependency {
                 if (requested.group == "org.jetbrains.kotlinx" && requested.module.name.startsWith("kotlinx-coroutines")){
                     this.useTarget("com.vickyleu.kotlinx.coroutines:${requested.module.name}:1.10.1-SNAPSHOT")
@@ -246,28 +266,57 @@ gradle.rootProject {
                 buildDeps()
                 buildDepsEap()
             } else {
-                mavenCentral()
-                gradlePluginPortal()
+                mavenCentral(){
+                    content {
+                        excludeGroupByRegex("com.vickyleu.*")
+                    }
+                }
+                gradlePluginPortal(){
+                    content {
+                        excludeGroupByRegex("com.vickyleu.*")
+                    }
+                }
 
-                maven("https://www.jetbrains.com/intellij-repository/releases")
+                maven("https://www.jetbrains.com/intellij-repository/releases"){
+                    content {
+                        excludeGroupByRegex("com.vickyleu.*")
+                    }
+                }
 
-                maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
-                maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
-                maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev")
+                maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies"){
+                    content {
+                        excludeGroupByRegex("com.vickyleu.*")
+                    }
+                }
+                maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap"){
+                    content {
+                        excludeGroupByRegex("com.vickyleu.*")
+                    }
+                }
+                maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev"){
+                    content {
+                        excludeGroupByRegex("com.vickyleu.*")
+                    }
+                }
 
-                maven("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
+                maven("https://maven.pkg.jetbrains.space/public/p/ktor/eap"){
+                    content {
+                        excludeGroupByRegex("com.vickyleu.*")
+                    }
+                }
             }
             maven {
                 name="github-maven"
                 url=uri("https://raw.githubusercontent.com/vickyleu/kotlin_linuxarm32hfp_maven/main")
                 content {
-                    includeGroup("com.vickyleu.kotlinx.coroutines")
-                    includeGroup("com.vickyleu.kotlinx")
-                    includeGroup("com.vickyleu.ktor")
-                    includeGroup("com.vickyleu.oshai")
+                    includeGroupByRegex("com.vickyleu.*")
                 }
             }
-            maven("$globalRootDir/lib-kotlin/")
+            maven("$globalRootDir/lib-kotlin/"){
+                content {
+                    excludeGroupByRegex("com.vickyleu.*")
+                }
+            }
         }
     }
 }
