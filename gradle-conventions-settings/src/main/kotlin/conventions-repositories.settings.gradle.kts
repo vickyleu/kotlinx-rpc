@@ -107,6 +107,13 @@ pluginManagement {
             }
         }
         maven {
+            url = uri("file:///Users/vickyleu/Developer/Github/kotlin/build/repo")
+            content{
+                includeGroup("org.jetbrains.kotlin")
+                includeGroupByRegex("org.jetbrains.kotlin.*")
+            }
+        }
+        maven {
             name="github-maven"
             url=uri("https://raw.githubusercontent.com/vickyleu/kotlin_linuxarm32hfp_maven/main")
             content {
@@ -235,6 +242,13 @@ gradle.rootProject {
                     }
                 }
                 maven {
+                    url = uri("file:///Users/vickyleu/Developer/Github/kotlin/build/repo")
+                    content{
+                        includeGroup("org.jetbrains.kotlin")
+                        includeGroupByRegex("org.jetbrains.kotlin.*")
+                    }
+                }
+                maven {
                     name="github-maven"
                     url=uri("https://raw.githubusercontent.com/vickyleu/kotlin_linuxarm32hfp_maven/main")
                     content {
@@ -303,6 +317,13 @@ gradle.rootProject {
                     content {
                         excludeGroupByRegex("com.vickyleu.*")
                     }
+                }
+            }
+            maven {
+                url = uri("file:///Users/vickyleu/Developer/Github/kotlin/build/repo")
+                content{
+                    includeGroup("org.jetbrains.kotlin")
+                    includeGroupByRegex("org.jetbrains.kotlin.*")
                 }
             }
             maven {
