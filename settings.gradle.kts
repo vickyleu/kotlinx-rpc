@@ -64,6 +64,7 @@ includePublic(":krpc:krpc-ktor:krpc-ktor-server")
 includePublic(":krpc:krpc-ktor:krpc-ktor-client")
 
 include(":tests")
+include(":tests:krpc-compatibility-tests")
 
 val kotlinMasterBuild = providers.gradleProperty("kotlinx.rpc.kotlinMasterBuild").orNull == "true"
 

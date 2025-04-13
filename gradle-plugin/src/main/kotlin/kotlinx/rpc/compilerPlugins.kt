@@ -36,12 +36,11 @@ internal class CompilerPluginCli : KotlinCompilerPluginSupportPlugin by compiler
                 SubpluginOption("strict-stateFlow", strict.stateFlow.get().toCompilerArg()),
                 SubpluginOption("strict-sharedFlow", strict.sharedFlow.get().toCompilerArg()),
                 SubpluginOption("strict-nested-flow", strict.nestedFlow.get().toCompilerArg()),
-                // WIP: https://youtrack.jetbrains.com/issue/KRPC-133
-//                SubpluginOption("strict-stream-scope", strict.streamScopedFunctions.get().toCompilerArg()),
-//                SubpluginOption(
-//                    "strict-suspending-server-streaming",
-//                    strict.suspendingServerStreaming.get().toCompilerArg()
-//                ),
+                SubpluginOption("strict-stream-scope", strict.streamScopedFunctions.get().toCompilerArg()),
+                SubpluginOption(
+                    "strict-suspending-server-streaming",
+                    strict.suspendingServerStreaming.get().toCompilerArg()
+                ),
                 SubpluginOption("strict-not-top-level-server-flow", strict.notTopLevelServerFlow.get().toCompilerArg()),
                 SubpluginOption("strict-fields", strict.fields.get().toCompilerArg()),
                 @OptIn(RpcDangerousApi::class)

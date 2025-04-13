@@ -1,23 +1,27 @@
 /*
- * Copyright 2023-2024 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
+ * Copyright 2023-2025 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
  */
 
 package kotlinx.rpc.krpc.client
 
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.rpc.RpcCall
 import kotlinx.rpc.RpcClient
+import kotlinx.rpc.annotations.Rpc
 import kotlinx.rpc.descriptor.RpcCallable
 import kotlinx.rpc.internal.serviceScopeOrNull
 import kotlinx.rpc.internal.utils.InternalRpcApi
-import kotlinx.rpc.internal.utils.SupervisedCompletableDeferred
+import kotlinx.rpc.internal.utils.RpcInternalSupervisedCompletableDeferred
 import kotlinx.rpc.internal.utils.getOrNull
-import kotlinx.rpc.internal.utils.map.ConcurrentHashMap
+import kotlinx.rpc.internal.utils.map.RpcInternalConcurrentHashMap
 import kotlinx.rpc.krpc.*
 import kotlinx.rpc.krpc.client.internal.KrpcClientConnector
 import kotlinx.rpc.krpc.internal.*
-import kotlinx.rpc.krpc.internal.logging.CommonLogger
+import kotlinx.rpc.krpc.internal.logging.RpcInternalCommonLogger
 import kotlinx.serialization.BinaryFormat
 import kotlinx.serialization.SerialFormat
 import kotlinx.serialization.StringFormat
@@ -64,7 +68,7 @@ public abstract class KrpcClient(
 
     private val callCounter = atomic(0L)
 
-    override val logger: CommonLogger = CommonLogger.logger(objectId())
+    final override val logger: RpcInternalCommonLogger = RpcInternalCommonLogger.logger(rpcInternalObjectId())
 
     private val serverSupportedPlugins: CompletableDeferred<Set<KrpcPlugin>> = CompletableDeferred()
 
@@ -75,7 +79,7 @@ public abstract class KrpcClient(
     private var clientCancelled = false
 
     // callId to serviceTypeString
-    private val cancellingRequests = ConcurrentHashMap<String, String>()
+    private val cancellingRequests = RpcInternalConcurrentHashMap<String, String>()
 
     init {
         coroutineContext.job.invokeOnCompletion(onCancelling = true) {
@@ -140,6 +144,10 @@ public abstract class KrpcClient(
         }
     }
 
+    @Deprecated(
+        "This method was primarily used for fields in RPC services, which are now deprecated. " +
+                "See https://kotlin.github.io/kotlinx-rpc/strict-mode.html fields guide for more information"
+    )
     override fun <T> callAsync(
         serviceScope: CoroutineScope,
         call: RpcCall,
@@ -147,7 +155,7 @@ public abstract class KrpcClient(
         val callable = call.descriptor.getCallable(call.callableName)
             ?: error("Unexpected callable '${call.callableName}' for ${call.descriptor.fqName} service")
 
-        val deferred = SupervisedCompletableDeferred<T>(serviceScope.coroutineContext.job)
+        val deferred = RpcInternalSupervisedCompletableDeferred<T>(serviceScope.coroutineContext.job)
 
         /**
          * Launched on the service scope (receiver)
@@ -173,7 +181,7 @@ public abstract class KrpcClient(
         val callable = call.descriptor.getCallable(call.callableName)
             ?: error("Unexpected callable '${call.callableName}' for ${call.descriptor.fqName} service")
 
-        val callCompletableResult = SupervisedCompletableDeferred<T>()
+        val callCompletableResult = RpcInternalSupervisedCompletableDeferred<T>()
         val rpcCall = call(call, callable, callCompletableResult)
         val result = callCompletableResult.await()
 
@@ -249,9 +257,7 @@ public abstract class KrpcClient(
 
         val id = callCounter.incrementAndGet()
 
-        val dataTypeString = callable.dataType.toString()
-
-        val callId = "$connectionId:$dataTypeString:$id"
+        val callId = "$connectionId:${callable.name}:$id"
 
         logger.trace { "start a call[$callId] ${callable.name}" }
 
@@ -303,6 +309,123 @@ public abstract class KrpcClient(
         }
 
         connector.sendMessage(firstMessage)
+    }
+
+    private val noFlowSerialFormat = config.serialFormatInitializer.build()
+
+    @Suppress("detekt.CyclomaticComplexMethod")
+    override fun <T> callServerStreaming(call: RpcCall): Flow<T> {
+        return flow {
+            awaitHandshakeCompletion()
+
+            val id = callCounter.incrementAndGet()
+            val callable = call.descriptor.getCallable(call.callableName)
+                ?: error("Unexpected callable '${call.callableName}' for ${call.descriptor.fqName} service")
+
+            val callId = "$connectionId:${callable.name}:$id"
+
+            val channel = Channel<T>()
+
+            val streamScope = StreamScope(currentCoroutineContext())
+
+            try {
+                val streamContext = LazyKrpcStreamContext(streamScope, null) {
+                    KrpcStreamContext(callId, config, connectionId, call.serviceId, it)
+                }
+
+                val serialFormat = prepareSerialFormat(streamContext)
+
+                val request = serializeRequest(
+                    callId = callId,
+                    call = call,
+                    callable = callable,
+                    serialFormat = serialFormat,
+                    pluginParams = mapOf(KrpcPluginKey.NON_SUSPENDING_SERVER_FLOW_MARKER to ""),
+                )
+
+                connector.sendMessage(request)
+
+                connector.subscribeToCallResponse(call.descriptor.fqName, callId) { message ->
+                    handleServerStreamingMessage(message, channel, callable, call, callId)
+                }
+
+                streamContext.valueOrNull?.launchIf({ outgoingStreamsAvailable }) {
+                    handleOutgoingStreams(it, serialFormat, call.descriptor.fqName)
+                }
+
+                while (true) {
+                    val element = channel.receiveCatching()
+                    if (element.isClosed) {
+                        val ex = element.exceptionOrNull() ?: break
+                        throw ex
+                    }
+
+                    if (!element.isFailure) {
+                        emit(element.getOrThrow())
+                    }
+                }
+            } catch (e: CancellationException) {
+                // sendCancellation is not suspending, so no need for NonCancellable
+                sendCancellation(CancellationType.REQUEST, call.serviceId.toString(), callId)
+                connector.unsubscribeFromMessages(call.descriptor.fqName, callId)
+
+                throw e
+            } finally {
+                streamScope.close()
+                channel.close()
+            }
+        }
+    }
+
+    private suspend fun <T, @Rpc R : Any> handleServerStreamingMessage(
+        message: KrpcCallMessage,
+        channel: Channel<T>,
+        callable: RpcCallable<R>,
+        call: RpcCall,
+        callId: String,
+    ) {
+        when (message) {
+            is KrpcCallMessage.CallData -> {
+                error("Unexpected message")
+            }
+
+            is KrpcCallMessage.CallException -> {
+                val cause = runCatching {
+                    message.cause.deserialize()
+                }
+
+                val result = if (cause.isFailure) {
+                    cause.exceptionOrNull()!!
+                } else {
+                    cause.getOrNull()!!
+                }
+
+                channel.close(result)
+            }
+
+            is KrpcCallMessage.CallSuccess, is KrpcCallMessage.StreamMessage -> {
+                val value = runCatching {
+                    val serializerResult = noFlowSerialFormat.serializersModule
+                        .rpcSerializerForType(callable.returnType)
+
+                    decodeMessageData(noFlowSerialFormat, serializerResult, message)
+                }
+
+                @Suppress("UNCHECKED_CAST")
+                channel.send(value.getOrNull() as T)
+            }
+
+            is KrpcCallMessage.StreamFinished -> {
+                connector.unsubscribeFromMessages(call.descriptor.fqName, callId)
+                channel.close()
+            }
+
+            is KrpcCallMessage.StreamCancel -> {
+                connector.unsubscribeFromMessages(call.descriptor.fqName, callId)
+                val cause = message.cause.deserialize()
+                channel.close(cause)
+            }
+        }
     }
 
     private suspend fun handleMessage(
@@ -385,6 +508,7 @@ public abstract class KrpcClient(
         call: RpcCall,
         callable: RpcCallable<*>,
         serialFormat: SerialFormat,
+        pluginParams: Map<KrpcPluginKey, String> = emptyMap(),
     ): KrpcCallMessage {
         val serializerData = serialFormat.serializersModule.rpcSerializerForType(callable.dataType)
         return when (serialFormat) {
@@ -398,6 +522,7 @@ public abstract class KrpcClient(
                     data = stringValue,
                     connectionId = connectionId,
                     serviceId = call.serviceId,
+                    pluginParams = pluginParams,
                 )
             }
 
@@ -411,6 +536,7 @@ public abstract class KrpcClient(
                     data = binaryValue,
                     connectionId = connectionId,
                     serviceId = call.serviceId,
+                    pluginParams = pluginParams,
                 )
             }
 

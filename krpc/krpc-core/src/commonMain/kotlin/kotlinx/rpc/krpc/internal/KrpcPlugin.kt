@@ -1,12 +1,12 @@
 /*
- * Copyright 2023-2024 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
+ * Copyright 2023-2025 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
  */
 
 package kotlinx.rpc.krpc.internal
 
-import kotlinx.rpc.internal.utils.IndexedEnum
+import kotlinx.rpc.internal.utils.RpcInternalIndexedEnum
 import kotlinx.rpc.internal.utils.InternalRpcApi
-import kotlinx.rpc.internal.utils.ShortEnumKSerializer
+import kotlinx.rpc.internal.utils.RpcInternalShortEnumKSerializer
 import kotlinx.serialization.Serializable
 
 /**
@@ -25,7 +25,7 @@ public enum class KrpcPlugin(
      * Only for maintenance purposes. Indicates when the plugin was added.
      */
     @Suppress("unused") private val since: KrpcVersion,
-) : IndexedEnum {
+) : RpcInternalIndexedEnum {
     /**
      * Represents all unknown plugins.
      * Endpoint may get this value from a peer, when peer has a newer version and with it some new plugins
@@ -50,6 +50,11 @@ public enum class KrpcPlugin(
      * This feature adds support for proper service/request cancellation over the network.
      */
     CANCELLATION(2, KrpcVersion.V_0_1_0_BETA),
+
+    /**
+     * This feature adds support for proper service/request cancellation over the network.
+     */
+    NON_SUSPENDING_SERVER_FLOWS(3, KrpcVersion.V_0_6_0),
     ;
 
     @InternalRpcApi
@@ -61,7 +66,7 @@ public enum class KrpcPlugin(
     }
 }
 
-private class KrpcPluginSerializer : ShortEnumKSerializer<KrpcPlugin>(
+private class KrpcPluginSerializer : RpcInternalShortEnumKSerializer<KrpcPlugin>(
     kClass = KrpcPlugin::class,
     unknownValue = KrpcPlugin.UNKNOWN,
     allValues = KrpcPlugin.ALL,

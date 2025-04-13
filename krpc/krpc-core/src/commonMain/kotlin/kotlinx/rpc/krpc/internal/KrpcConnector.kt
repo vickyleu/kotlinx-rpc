@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
+ * Copyright 2023-2025 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
  */
 
 package kotlinx.rpc.krpc.internal
@@ -12,8 +12,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.rpc.internal.utils.InternalRpcApi
 import kotlinx.rpc.krpc.KrpcTransport
 import kotlinx.rpc.krpc.KrpcTransportMessage
-import kotlinx.rpc.krpc.internal.logging.CommonLogger
-import kotlinx.rpc.krpc.internal.logging.DumpLoggerContainer
+import kotlinx.rpc.krpc.internal.logging.RpcInternalCommonLogger
+import kotlinx.rpc.krpc.internal.logging.RpcInternalDumpLoggerContainer
 import kotlinx.serialization.*
 
 @InternalRpcApi
@@ -47,14 +47,14 @@ public class KrpcConnector<SubscriptionKey>(
     private val getKey: KrpcMessage.() -> SubscriptionKey,
 ) : KrpcMessageSender, CoroutineScope by transport {
     private val role = if (isServer) SERVER_ROLE else CLIENT_ROLE
-    private val logger = CommonLogger.logger(objectId(role))
+    private val logger = RpcInternalCommonLogger.logger(rpcInternalObjectId(role))
 
     private val mutex = Mutex()
 
     private val waiting = mutableMapOf<SubscriptionKey, MutableList<KrpcMessage>>()
     private val subscriptions = mutableMapOf<SubscriptionKey, KrpcMessageHandler>()
 
-    private val dumpLogger by lazy { DumpLoggerContainer.provide() }
+    private val dumpLogger by lazy { RpcInternalDumpLoggerContainer.provide() }
 
     override suspend fun sendMessage(message: KrpcMessage) {
         val transportMessage = when (serialFormat) {
@@ -154,9 +154,25 @@ public class KrpcConnector<SubscriptionKey>(
             if (waitForSubscribers) {
                 waiting.getOrPut(message.getKey()) { mutableListOf() }.add(message)
 
-                logger.warn {
+                val reason = when (result) {
+                    is HandlerResult.Failure -> {
+                        "Unhandled exception while processing ${result.cause?.message}"
+                    }
+
+                    is HandlerResult.NoSubscription -> {
+                        "No service with key '${message.getKey()}' and '${message.serviceType}' type was registered." +
+                                "Available: keys: [${subscriptions.keys.joinToString()}]"
+                    }
+
+                    else -> {
+                        "Unknown"
+                    }
+                }
+
+                logger.warn((result as? HandlerResult.Failure)?.cause) {
                     "No registered service of ${message.serviceType} service type " +
-                            "was able to process message at the moment. Waiting for new services."
+                            "was able to process message at the moment. Waiting for new services." +
+                            "Reason: $reason"
                 }
 
                 return

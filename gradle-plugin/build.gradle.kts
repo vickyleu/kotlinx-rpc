@@ -65,7 +65,7 @@ abstract class GeneratePluginVersionTask @Inject constructor(
             public const val LIBRARY_VERSION: String = "$libraryVersion"
 
             @Deprecated("Use kotlinx.rpc.LIBRARY_VERSION instead", ReplaceWith("kotlinx.rpc.LIBRARY_VERSION"))
-            public const val PLUGIN_VERSION_STR: String = LIBRARY_VERSION
+            public const val PLUGIN_VERSION: String = LIBRARY_VERSION
 
             public const val PROTOBUF_VERSION: String = "$protobufVersion"
             public const val GRPC_VERSION: String = "$grpcVersion"

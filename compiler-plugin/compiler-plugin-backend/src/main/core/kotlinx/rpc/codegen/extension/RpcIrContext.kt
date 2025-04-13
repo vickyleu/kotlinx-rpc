@@ -177,11 +177,15 @@ internal class RpcIrContext(
         }
 
         val dataCast by lazy {
-            namedFunction("kotlinx.rpc.internal", "dataCast")
+            namedFunction("kotlinx.rpc.internal", "rpcInternalDataCast")
         }
 
         val rpcClientCall by lazy {
             rpcClient.namedFunction("call")
+        }
+
+        val rpcClientCallServerStreaming by lazy {
+            rpcClient.namedFunction("callServerStreaming")
         }
 
         val provideStubContext by lazy {

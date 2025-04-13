@@ -19,23 +19,23 @@ public inline fun <@Rpc reified T : Any> serviceDescriptorOf(): RpcServiceDescri
 
 @ExperimentalRpcApi
 public fun <@Rpc T : Any> serviceDescriptorOf(kType: KType): RpcServiceDescriptor<T> {
-    return serviceDescriptorOf(kType.kClass())
+    return serviceDescriptorOf(kType.rpcInternalKClass())
 }
 
 @ExperimentalRpcApi
 public fun <@Rpc T : Any> serviceDescriptorOf(kClass: KClass<T>): RpcServiceDescriptor<T> {
     val maybeDescriptor = internalServiceDescriptorOf(kClass)
-        ?: internalError("Unable to find a service descriptor of the $kClass")
+        ?: internalRpcError("Unable to find a service descriptor of the $kClass")
 
     if (maybeDescriptor is RpcServiceDescriptor<*>) {
         @Suppress("UNCHECKED_CAST")
         return maybeDescriptor as RpcServiceDescriptor<T>
     }
 
-    internalError(
+    internalRpcError(
         "Located descriptor object is not of a desired type ${RpcServiceDescriptor::class}, " +
                 "instead found $maybeDescriptor of the class " +
-                (maybeDescriptor::class.qualifiedClassNameOrNull ?: maybeDescriptor::class)
+                (maybeDescriptor::class.rpcInternalQualifiedClassNameOrNull ?: maybeDescriptor::class)
     )
 }
 
@@ -62,6 +62,7 @@ public class RpcCallable<@Rpc T : Any>(
     public val returnType: RpcType,
     public val invokator: RpcInvokator<T>,
     public val parameters: Array<RpcParameter>,
+    public val isNonSuspendFunction: Boolean,
 )
 
 @ExperimentalRpcApi
@@ -87,6 +88,6 @@ public class RpcParameter(public val name: String, public val type: RpcType)
 @ExperimentalRpcApi
 public class RpcType(public val kType: KType) {
     override fun toString(): String {
-        return return kType.toString()
+        return kType.toString()
     }
 }

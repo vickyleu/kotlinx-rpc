@@ -80,16 +80,16 @@ public open class RpcStrictModeExtension @Inject constructor(objects: ObjectFact
     public val nestedFlow: Property<RpcStrictMode> = objects.strictModeProperty()
 
     /**
-     * WIP: https://youtrack.jetbrains.com/issue/KRPC-133
-     * Will be enabled later, when an alternative is ready.
+     * StreamScoped functions are deprecated.
      */
-    private val streamScopedFunctions: Property<RpcStrictMode> = objects.strictModeProperty(RpcStrictMode.NONE)
+    public val streamScopedFunctions: Property<RpcStrictMode> = objects.strictModeProperty()
 
     /**
-     * WIP: https://youtrack.jetbrains.com/issue/KRPC-133
-     * Will be enabled later, when an alternative is ready.
+     * Suspending functions with server-streaming are deprecated in RPC.
+     *
+     * Consider returning a Flow in a non-suspending function.
      */
-    private val suspendingServerStreaming: Property<RpcStrictMode> = objects.strictModeProperty(RpcStrictMode.NONE)
+    public val suspendingServerStreaming: Property<RpcStrictMode> = objects.strictModeProperty()
 
     /**
      * Not top-level flows in the return value are deprecated in RPC for streaming.

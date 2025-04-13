@@ -24,6 +24,7 @@ fun Project.configureApiValidation() {
                 "krpc-test",
                 "utils",
                 "protobuf-plugin",
+                "krpc-compatibility-tests",
             )
         )
 

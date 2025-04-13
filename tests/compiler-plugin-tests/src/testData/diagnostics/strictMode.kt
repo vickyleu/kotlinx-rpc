@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
+ * Copyright 2023-2025 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
  */
 
 // MODULE: none
@@ -29,7 +29,7 @@ import kotlinx.serialization.Contextual
 import kotlinx.rpc.annotations.Rpc
 import kotlinx.rpc.krpc.streamScoped
 import kotlinx.rpc.krpc.withStreamScope
-import kotlinx.rpc.krpc.StreamScope
+import <!DEPRECATION!>kotlinx.rpc.krpc.StreamScope<!>
 import kotlinx.rpc.krpc.invokeOnStreamScopeCompletion
 import kotlinx.rpc.internal.utils.ExperimentalRpcApi
 
@@ -76,11 +76,13 @@ interface MyService {
     suspend fun clientInnerFlow(inner: InnerFlow)
     suspend fun clientNestedFlow(<!NESTED_STREAMING_IN_RPC_SERVICE!>inner: Flow<Flow<Int>><!>)
     suspend fun clientNestedTrickyFlow(<!NESTED_STREAMING_IN_RPC_SERVICE!>inner: Wrapper<Flow<Wrapper<Flow<Int>>>><!>)
+    <!NON_SUSPENDING_REQUEST_WITHOUT_STREAMING_RETURN_TYPE!>fun nonSuspendNoFlow()<!>
+    <!NON_SUSPENDING_REQUEST_WITHOUT_STREAMING_RETURN_TYPE!>fun nonSuspendNoFlowString(): String<!>
 }
 
 fun main(): Unit = runBlocking {
-    <!STREAM_SCOPE_FUNCTION_IN_RPC!>streamScoped<!> {}
-    val scope = <!STREAM_SCOPE_FUNCTION_IN_RPC!>StreamScope<!>(Job())
-    <!STREAM_SCOPE_FUNCTION_IN_RPC!>withStreamScope<!>(scope) {}
-    <!STREAM_SCOPE_FUNCTION_IN_RPC!>invokeOnStreamScopeCompletion<!> {}
+    <!DEPRECATION, STREAM_SCOPE_FUNCTION_IN_RPC!>streamScoped<!> {}
+    val scope = <!DEPRECATION, STREAM_SCOPE_FUNCTION_IN_RPC!>StreamScope<!>(Job())
+    <!DEPRECATION, STREAM_SCOPE_FUNCTION_IN_RPC!>withStreamScope<!>(scope) {}
+    <!DEPRECATION, STREAM_SCOPE_FUNCTION_IN_RPC!>invokeOnStreamScopeCompletion<!> {}
 }
