@@ -49,7 +49,6 @@ internal class KotlinCompilerPluginBuilder {
 
             override fun getPluginArtifact(): SubpluginArtifact {
                 val artifactId = artifactId ?: compilerPluginArtifactId(isInternal)
-
                 return SubpluginArtifact(groupId, artifactId + pluginSuffix, version)
             }
         }

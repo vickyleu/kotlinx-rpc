@@ -36,9 +36,8 @@ if (gradle.parent != null && gradle.parent!!.startParameter.isDryRun) {
 gradlePlugin {
     plugins {
         create("plugin") {
-            id = "com.vickyleu.kotlinx.rpc.plugin"
-//            id = "org.jetbrains.kotlinx.rpc.plugin"
-
+//            id = "com.vickyleu.kotlinx.rpc.plugin"
+            id = "org.jetbrains.kotlinx.rpc.plugin"
             displayName = "kotlinx.rpc Gradle Plugin"
             implementationClass = "kotlinx.rpc.RpcGradlePlugin"
             description = """

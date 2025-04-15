@@ -182,6 +182,7 @@ public interface GrpcPlugin {
 
 internal fun Project.configureGrpc() {
     val grpc = rpcExtension().grpc
+
     var wasApplied = false
 
     pluginManager.withPlugin("com.google.protobuf") {
@@ -218,6 +219,7 @@ private fun ProtobufExtension.configureProtobuf(project: Project) {
     protoc {
         artifact = "com.google.protobuf:protoc:$PROTOBUF_VERSION"
     }
+
 
     plugins {
         val existed = findByName(GrpcExtension.LOCATOR_NAME) != null

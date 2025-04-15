@@ -28,6 +28,12 @@ fun MavenPublication.setPublicArtifactId(project: Project) {
 
     if (!publication.artifactId.startsWith(KOTLINX_RPC_PREFIX)) {
         publication.artifactId = "$KOTLINX_RPC_PREFIX-$artifactId"
+        if(publication.artifactId=="kotlinx-rpc-gradle-plugin"){
+            publication.groupId="com.vickyleu.kotlinx.rpc"
+            publication.artifactId="org.jetbrains.kotlinx.rpc.plugin.gradle.plugin"
+            //org.jetbrains.kotlinx.rpc.plugin.gradle.plugin
+            // fuck 😡😡
+        }
         project.logger.info("Altered artifactId for $name publication: $artifactId")
     }
 }
