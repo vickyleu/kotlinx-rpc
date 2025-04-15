@@ -10,7 +10,8 @@ import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
 import org.jetbrains.kotlin.gradle.utils.loadPropertyFromResources
 
 internal object RpcPluginConst {
-    const val GROUP_ID = "org.jetbrains.kotlinx"
+    const val GROUP_ID = "com.vickyleu.kotlinx"
+//    const val GROUP_ID = "org.jetbrains.kotlinx"
     const val PLUGIN_ID = "kotlinx-rpc"
     const val COMPILER_PLUGIN_ARTIFACT_ID = "kotlinx-rpc-compiler-plugin"
 

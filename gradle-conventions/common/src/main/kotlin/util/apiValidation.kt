@@ -20,11 +20,11 @@ fun Project.configureApiValidation() {
 
         ignoredProjects.addAll(
             listOfNotNull(
-                if (kotlinMasterBuild) null else "compiler-plugin-tests",
+//                if (kotlinMasterBuild) null else "compiler-plugin-tests",
                 "krpc-test",
                 "utils",
                 "protobuf-plugin",
-                "krpc-compatibility-tests",
+//                "krpc-compatibility-tests",
             )
         )
 

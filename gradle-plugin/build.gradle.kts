@@ -12,8 +12,8 @@ plugins {
     alias(libs.plugins.conventions.gradle.doctor)
 }
 
-//group = "com.vickyleu.kotlinx"
-group = "org.jetbrains.kotlinx"
+group = "com.vickyleu.kotlinx"
+//group = "org.jetbrains.kotlinx"
 version = rootProject.libs.versions.kotlinx.rpc.get()
 
 kotlin {
@@ -36,7 +36,8 @@ if (gradle.parent != null && gradle.parent!!.startParameter.isDryRun) {
 gradlePlugin {
     plugins {
         create("plugin") {
-            id = "org.jetbrains.kotlinx.rpc.plugin"
+            id = "com.vickyleu.kotlinx.rpc.plugin"
+//            id = "org.jetbrains.kotlinx.rpc.plugin"
 
             displayName = "kotlinx.rpc Gradle Plugin"
             implementationClass = "kotlinx.rpc.RpcGradlePlugin"

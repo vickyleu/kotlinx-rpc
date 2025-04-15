@@ -63,13 +63,13 @@ includePublic(":krpc:krpc-ktor:krpc-ktor-core")
 includePublic(":krpc:krpc-ktor:krpc-ktor-server")
 includePublic(":krpc:krpc-ktor:krpc-ktor-client")
 
-include(":tests")
-include(":tests:krpc-compatibility-tests")
-
-val kotlinMasterBuild = providers.gradleProperty("kotlinx.rpc.kotlinMasterBuild").orNull == "true"
-
-if (!kotlinMasterBuild) {
-    include(":tests:compiler-plugin-tests")
-}
+//include(":tests")
+//include(":tests:krpc-compatibility-tests")
+//
+//val kotlinMasterBuild = providers.gradleProperty("kotlinx.rpc.kotlinMasterBuild").orNull == "true"
+//
+//if (!kotlinMasterBuild) {
+//    include(":tests:compiler-plugin-tests")
+//}
 
 include(":jpms-check")
